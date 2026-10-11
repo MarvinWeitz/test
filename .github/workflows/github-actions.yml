@@ -27,6 +27,7 @@ jobs:
           node-version: 22
       - run: npx --yes "$SENTINEL_SOURCE" "$SENTINEL_PATH"
         env:
+          SENTINEL_NOTIFY_ON: ok
           SENTINEL_WEBHOOK_URL: ${{ secrets.SENTINEL_WEBHOOK_URL }}
           # Optional: an address that expects a ping after every run and alerts when one is
           # missing, so a pipeline that stopped running is noticed.
