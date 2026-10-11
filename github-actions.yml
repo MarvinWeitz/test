@@ -1,0 +1,33 @@
+# Copy to .github/workflows/stack-sentinel.yml in the project to monitor.
+# Add the webhook URL as repository secret SENTINEL_WEBHOOK_URL.
+name: stack-sentinel
+on:
+  schedule:
+    - cron: "17 6 * * 1" # Mondays 06:17 UTC
+  workflow_dispatch:
+env:
+  # Where the tool is installed from: this repository, a fork, or an internal mirror.
+  # "#stable" follows the latest tested release, so the tool stays current without
+  # anyone editing this file. To stay on one release instead, name its tag, e.g. "#v0.2.0".
+  SENTINEL_SOURCE: "github:MarvinWeitz/stack-sentinel#stable"
+  SENTINEL_PATH: "." # folder to scan
+  SENTINEL_PROJECT: ${{ github.repository }}
+  # Optional: settings shared by many projects, kept in one place (see examples/shared-config.json).
+  # SENTINEL_SHARED_CONFIG: https://raw.githubusercontent.com/<owner>/<repo>/main/shared-config.json
+  # Any other setting from the README can go here, for example:
+  # SENTINEL_SKIP_CHECKS: ""
+  # SENTINEL_UI5_WARN_DAYS: "90"
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npx --yes "$SENTINEL_SOURCE" "$SENTINEL_PATH"
+        env:
+          SENTINEL_WEBHOOK_URL: ${{ secrets.SENTINEL_WEBHOOK_URL }}
+          # Optional: an address that expects a ping after every run and alerts when one is
+          # missing, so a pipeline that stopped running is noticed.
+          SENTINEL_HEARTBEAT_URL: ${{ secrets.SENTINEL_HEARTBEAT_URL }}
